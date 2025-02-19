@@ -15,7 +15,7 @@ instance (N : Submodule R M) : ContinuousConstSMul R N where
   continuous_const_smul r := by
     apply Continuous.subtype_map
     · exact ContinuousConstSMul.continuous_const_smul r
-    · exact fun n hn ↦ Submodule.smul_mem N r hn
+    · exact fun _ hn ↦ Submodule.smul_mem N r hn
 
 class WeaklyContinuous : Prop where
   is_continuous (g : G) : Continuous (fun m : M ↦ π g m)
@@ -31,7 +31,7 @@ open IsTopologicalGroup
 
 def I : Representation R G C(G,M) where
   toFun g           := {
-    toFun f         := ContinuousMap.comp ⟨(π g),WeaklyContinuous.is_continuous g⟩ (ContinuousMap.comp f ⟨fun x ↦ g⁻¹ * x, continuous_mul_left g⁻¹⟩)
+    toFun f         := ContinuousMap.comp ⟨(π g),is_continuous g⟩ (ContinuousMap.comp f ⟨fun x ↦ g⁻¹ * x, continuous_mul_left g⁻¹⟩)
     map_add' _ _    := by ext; simp
     map_smul' _ _   := by ext; simp
   }
@@ -39,7 +39,7 @@ def I : Representation R G C(G,M) where
   map_mul' g₁ g₂ := by ext; simp [mul_assoc]
 
 lemma I_apply₄ (g : G) (f : C(G,M)) (x : G) : I π g f x = π g (f (g⁻¹ * x)) := rfl
-lemma I_apply₃ (g : G) (f : C(G,M)) : I π g f = ContinuousMap.comp ⟨(π g), WeaklyContinuous.is_continuous g⟩ (f.comp (left_mul g⁻¹)) := rfl
+lemma I_apply₃ (g : G) (f : C(G,M)) : I π g f = ContinuousMap.comp ⟨(π g), is_continuous g⟩ (f.comp (left_mul g⁻¹)) := rfl
 
 instance : ContinuousConstSMul R C(G,M) where
   continuous_const_smul r := by
@@ -87,24 +87,24 @@ def continuousIntertwining : Submodule R (M →L[R] M') := {
 }
 
 def ContinuousIntertwining : Type := continuousIntertwining π π'
-notation π " →ᵢ " π' => ContinuousIntertwining π π'
+notation π " →ᵢₜ " π' => ContinuousIntertwining π π'
 
-instance : AddCommGroup (π →ᵢ π') := inferInstanceAs (AddCommGroup (continuousIntertwining π π'))
-instance : Module R (π →ᵢ π') := inferInstanceAs (Module R (continuousIntertwining π π'))
+instance : AddCommGroup (π →ᵢₜ π') := inferInstanceAs (AddCommGroup (continuousIntertwining π π'))
+instance : Module R (π →ᵢₜ π') := inferInstanceAs (Module R (continuousIntertwining π π'))
 
 namespace ContinuousIntertwining
 
 omit [TopologicalSpace G] [IsTopologicalAddGroup M] [ContinuousConstSMul R M] [WeaklyContinuous π] [WeaklyContinuous π'] in
-@[ext] lemma ext (φ ψ : π →ᵢ π') (h : φ.val = ψ.val) : φ = ψ := Subtype.ext h
+@[ext] lemma ext (φ ψ : π →ᵢₜ π') (h : φ.val = ψ.val) : φ = ψ := Subtype.ext h
 
-instance : FunLike (π →ᵢ π') M M' where
+instance : FunLike (π →ᵢₜ π') M M' where
   coe φ := φ.val
   coe_injective' _ _ h := ext (h := ContinuousLinearMap.ext (congrFun h))
 
-instance : AddHomClass (π →ᵢ π') M M' := ⟨fun φ ↦ map_add φ.val⟩
-instance : MulActionHomClass (π →ᵢ π') R M M' := ⟨fun φ ↦ map_smul φ.val⟩
+instance : AddHomClass (π →ᵢₜ π') M M' := ⟨fun φ ↦ map_add φ.val⟩
+instance : MulActionHomClass (π →ᵢₜ π') R M M' := ⟨fun φ ↦ map_smul φ.val⟩
 
-def id : π →ᵢ π where
+def id : π →ᵢₜ π where
   val           := ContinuousLinearMap.id R M
   property _ _  := rfl
 
@@ -115,69 +115,69 @@ section omit_instance
 variable {π π' π''}
 omit [TopologicalSpace G] [IsTopologicalAddGroup M] [ContinuousConstSMul R M] [WeaklyContinuous π] [WeaklyContinuous π'] [WeaklyContinuous π'']
 
-@[norm_cast] lemma coe_apply (φ : π →ᵢ π') (m : M) : φ.val m = φ m := rfl
-@[push_cast] lemma coe_add (φ ψ : π →ᵢ π') : (φ + ψ).val = φ.val + ψ.val := rfl
-@[push_cast] lemma coe_sub (φ ψ : π →ᵢ π') : (φ - ψ).val = φ.val - ψ.val := rfl
-@[push_cast] lemma coe_smul (r : R) (φ : π →ᵢ π') : (r • φ).val = r • φ.val := rfl
+@[norm_cast] lemma coe_apply (φ : π →ᵢₜ π') (m : M) : φ.val m = φ m := rfl
+@[push_cast] lemma coe_add (φ ψ : π →ᵢₜ π') : (φ + ψ).val = φ.val + ψ.val := rfl
+@[push_cast] lemma coe_sub (φ ψ : π →ᵢₜ π') : (φ - ψ).val = φ.val - ψ.val := rfl
+@[push_cast] lemma coe_smul (r : R) (φ : π →ᵢₜ π') : (r • φ).val = r • φ.val := rfl
 
-@[simp] lemma zero_apply (m : M) : (0 : π →ᵢ π') m = 0 := rfl
-@[simp] lemma add_apply (φ ψ : π →ᵢ π') (m : M) : (φ + ψ) m = φ m + ψ m := rfl
-@[simp] lemma sub_apply (φ ψ : π →ᵢ π') (m : M) : (φ - ψ) m = φ m - ψ m := rfl
-@[simp] lemma smul_apply (r : R) (φ : π →ᵢ π') (m : M) : (r • φ) m = r • (φ m) := rfl
-@[simp] lemma comm (φ : π →ᵢ π') (g : G) (m : M) : φ (π g m) = π' g (φ m) := φ.property g m
+@[simp] lemma zero_apply (m : M) : (0 : π →ᵢₜ π') m = 0 := rfl
+@[simp] lemma add_apply (φ ψ : π →ᵢₜ π') (m : M) : (φ + ψ) m = φ m + ψ m := rfl
+@[simp] lemma sub_apply (φ ψ : π →ᵢₜ π') (m : M) : (φ - ψ) m = φ m - ψ m := rfl
+@[simp] lemma smul_apply (r : R) (φ : π →ᵢₜ π') (m : M) : (r • φ) m = r • (φ m) := rfl
+@[simp] lemma comm (φ : π →ᵢₜ π') (g : G) (m : M) : φ (π g m) = π' g (φ m) := φ.property g m
 
-lemma comm' (φ : π →ᵢ π') (g : G) : φ ∘ π g = π' g ∘ φ := by ext; simp
+lemma comm' (φ : π →ᵢₜ π') (g : G) : φ ∘ π g = π' g ∘ φ := by ext; simp
 
-def compᵢ (φ : π' →ᵢ π'') (ψ : π →ᵢ π') : (π →ᵢ π'') where
+def compᵢ (φ : π' →ᵢₜ π'') (ψ : π →ᵢₜ π') : (π →ᵢₜ π'') where
   val           := φ.val ∘L ψ.val
   property _ _  := by simp [coe_apply]
 
 notation3:80 (name := compNotation) φ:81 " ∘ᵢ " ψ:80 => compᵢ φ ψ
 
-@[simp] lemma id_comp (φ : π →ᵢ π') : id π' ∘ᵢ φ = φ := rfl
+@[simp] lemma id_comp (φ : π →ᵢₜ π') : id π' ∘ᵢ φ = φ := rfl
 
-@[push_cast] lemma coe_compᵢ (φ : π' →ᵢ π'') (ψ : π →ᵢ π') : (φ ∘ᵢ ψ).val = φ.val ∘L ψ.val := rfl
+@[push_cast] lemma coe_compᵢ (φ : π' →ᵢₜ π'') (ψ : π →ᵢₜ π') : (φ ∘ᵢ ψ).val = φ.val ∘L ψ.val := rfl
 
-@[simp] lemma compᵢ_add (φ : π' →ᵢ π'') (ψ₁ ψ₂ : π →ᵢ π') : φ ∘ᵢ (ψ₁ + ψ₂) = φ ∘ᵢ ψ₁ + φ ∘ᵢ ψ₂ := by
+@[simp] lemma compᵢ_add (φ : π' →ᵢₜ π'') (ψ₁ ψ₂ : π →ᵢₜ π') : φ ∘ᵢ (ψ₁ + ψ₂) = φ ∘ᵢ ψ₁ + φ ∘ᵢ ψ₂ := by
   ext : 1
   push_cast
   simp
 
-@[simp] lemma compᵢ_sub (φ : π' →ᵢ π'') (ψ₁ ψ₂ : π →ᵢ π') : φ ∘ᵢ (ψ₁ - ψ₂) = φ ∘ᵢ ψ₁ - φ ∘ᵢ ψ₂ := by
+@[simp] lemma compᵢ_sub (φ : π' →ᵢₜ π'') (ψ₁ ψ₂ : π →ᵢₜ π') : φ ∘ᵢ (ψ₁ - ψ₂) = φ ∘ᵢ ψ₁ - φ ∘ᵢ ψ₂ := by
   ext : 1
   push_cast
   simp
 
-@[simp] lemma compᵢ_smul (φ : π' →ᵢ π'') (r : R) (ψ : π →ᵢ π') : φ ∘ᵢ (r • ψ) = r • (φ ∘ᵢ ψ) := by
+@[simp] lemma compᵢ_smul (φ : π' →ᵢₜ π'') (r : R) (ψ : π →ᵢₜ π') : φ ∘ᵢ (r • ψ) = r • (φ ∘ᵢ ψ) := by
   ext : 1
   push_cast
   simp
 
-@[simp] lemma add_compᵢ (φ₁ φ₂ : π' →ᵢ π'') (ψ : π →ᵢ π') : (φ₁ + φ₂) ∘ᵢ ψ = φ₁ ∘ᵢ ψ + φ₂ ∘ᵢ ψ := by
+@[simp] lemma add_compᵢ (φ₁ φ₂ : π' →ᵢₜ π'') (ψ : π →ᵢₜ π') : (φ₁ + φ₂) ∘ᵢ ψ = φ₁ ∘ᵢ ψ + φ₂ ∘ᵢ ψ := by
   ext : 1
   push_cast
   simp
 
-@[simp] lemma sub_compᵢ (φ₁ φ₂ : π' →ᵢ π'') (ψ : π →ᵢ π') : (φ₁ - φ₂) ∘ᵢ ψ = φ₁ ∘ᵢ ψ - φ₂ ∘ᵢ ψ := by
+@[simp] lemma sub_compᵢ (φ₁ φ₂ : π' →ᵢₜ π'') (ψ : π →ᵢₜ π') : (φ₁ - φ₂) ∘ᵢ ψ = φ₁ ∘ᵢ ψ - φ₂ ∘ᵢ ψ := by
   ext : 1
   push_cast
   simp
 
-@[simp] lemma smul_compᵢ (r : R) (φ : π' →ᵢ π'') (ψ : π →ᵢ π') : (r • φ) ∘ᵢ ψ = r • (φ ∘ᵢ ψ) := by
+@[simp] lemma smul_compᵢ (r : R) (φ : π' →ᵢₜ π'') (ψ : π →ᵢₜ π') : (r • φ) ∘ᵢ ψ = r • (φ ∘ᵢ ψ) := by
   ext : 1
   push_cast
   simp
 
-@[simp] lemma zero_comp (φ : π →ᵢ π') : (0 : π' →ᵢ π'') ∘ᵢ φ = 0 := rfl
-@[simp] lemma comp_zero (φ : π' →ᵢ π'') : φ ∘ᵢ (0 : π →ᵢ π') = 0 := by
+@[simp] lemma zero_comp (φ : π →ᵢₜ π') : (0 : π' →ᵢₜ π'') ∘ᵢ φ = 0 := rfl
+@[simp] lemma comp_zero (φ : π' →ᵢₜ π'') : φ ∘ᵢ (0 : π →ᵢₜ π') = 0 := by
   ext : 1
   apply ContinuousLinearMap.comp_zero
 
-lemma mem_invariants (φ : π →ᵢ π') {m : M} (hm : m ∈ π.invariants) : φ m ∈ π'.invariants := by
+lemma mem_invariants (φ : π →ᵢₜ π') {m : M} (hm : m ∈ π.invariants) : φ m ∈ π'.invariants := by
   intro
   rw [←comm, hm]
 
-def constᵢ : π →ᵢ I π where
+def constᵢ : π →ᵢₜ I π where
   val := {
     toFun         := ContinuousMap.const G
     map_add' _ _  := by ext; simp
@@ -186,7 +186,7 @@ def constᵢ : π →ᵢ I π where
   }
   property g m    := by ext; simp [I_apply₄]
 
-def mapᵢ : (π →ᵢ π') →ₗ[R] (I π →ᵢ I π') where
+def mapᵢ : (π →ᵢₜ π') →ₗ[R] (I π →ᵢₜ I π') where
   toFun φ := {
     val := {
       toFun f       := ContinuousMap.comp φ.val f
@@ -202,13 +202,13 @@ def mapᵢ : (π →ᵢ π') →ₗ[R] (I π →ᵢ I π') where
 end omit_instance
 
 omit [TopologicalSpace G] [WeaklyContinuous π] [WeaklyContinuous π'] in
-@[simp] lemma comp_id (φ : π →ᵢ π') : φ ∘ᵢ id π = φ := rfl
+@[simp] lemma comp_id (φ : π →ᵢₜ π') : φ ∘ᵢ id π = φ := rfl
 
-lemma mapᵢ_compᵢ_constᵢ (φ : π →ᵢ π') : φ.mapᵢ ∘ᵢ constᵢ = constᵢ ∘ᵢ φ := rfl
+lemma mapᵢ_compᵢ_constᵢ (φ : π →ᵢₜ π') : φ.mapᵢ ∘ᵢ constᵢ = constᵢ ∘ᵢ φ := rfl
 
-lemma mapᵢ_compᵢ (φ : π' →ᵢ π'') (ψ : π →ᵢ π') : (φ ∘ᵢ ψ).mapᵢ = φ.mapᵢ ∘ᵢ ψ.mapᵢ := rfl
+lemma mapᵢ_compᵢ (φ : π' →ᵢₜ π'') (ψ : π →ᵢₜ π') : (φ ∘ᵢ ψ).mapᵢ = φ.mapᵢ ∘ᵢ ψ.mapᵢ := rfl
 
-lemma mapᵢ_compᵢ_mapᵢ (φ : π' →ᵢ π'') (ψ : π →ᵢ π') : φ.mapᵢ ∘ᵢ ψ.mapᵢ = (φ ∘ᵢ ψ).mapᵢ := rfl
+lemma mapᵢ_compᵢ_mapᵢ (φ : π' →ᵢₜ π'') (ψ : π →ᵢₜ π') : φ.mapᵢ ∘ᵢ ψ.mapᵢ = (φ ∘ᵢ ψ).mapᵢ := rfl
 
 end ContinuousIntertwining
 end noncategorical
@@ -271,7 +271,7 @@ instance : CoeSort (WeaklyContinuousRep R G) (Type _) := ⟨fun rep ↦ rep.toMo
 instance (rep : WeaklyContinuousRep R G) : WeaklyContinuous rep.rep := rep.3
 
 instance : Category (WeaklyContinuousRep R G) where
-  Hom rep₁ rep₂ := rep₁.rep →ᵢ rep₂.rep
+  Hom rep₁ rep₂ := rep₁.rep →ᵢₜ rep₂.rep
   id rep := id rep.rep
   comp φ ψ := ψ ∘ᵢ φ
   id_comp := by tauto
@@ -279,30 +279,22 @@ instance : Category (WeaklyContinuousRep R G) where
   assoc   := by tauto
 
 instance : Preadditive (WeaklyContinuousRep R G) where
-  homGroup rep₁ rep₂ := inferInstanceAs (AddCommGroup (rep₁.rep →ᵢ rep₂.rep))
+  homGroup rep₁ rep₂ := inferInstanceAs (AddCommGroup (rep₁.rep →ᵢₜ rep₂.rep))
   add_comp _ _ _ _ _ _ := compᵢ_add _ _ _
   comp_add _ _ _ _ _ _ := add_compᵢ _ _ _
 
 instance : Linear R (WeaklyContinuousRep R G) where
-  homModule rep₁ rep₂ :=  inferInstanceAs (Module R (rep₁.rep →ᵢ rep₂.rep))
+  homModule rep₁ rep₂ :=  inferInstanceAs (Module R (rep₁.rep →ᵢₜ rep₂.rep))
   smul_comp _ _ _ _ _ _ := compᵢ_smul _ _ _
   comp_smul _ _ _ _ _ _ := smul_compᵢ _ _ _
 
-instance (rep₁ rep₂ : WeaklyContinuousRep R G) : FunLike (rep₁ ⟶ rep₂) rep₁ rep₂ :=
-  inferInstanceAs (FunLike (rep₁.rep →ᵢ rep₂.rep) rep₁ rep₂)
-
--- omit [TopologicalSpace G] in
--- lemma sub_apply (rep₁ rep₂ : WeaklyContinuousRep R G) (φ₁ φ₂ : rep₁ ⟶ rep₂) (m : rep₁) : (φ₁ - φ₂) m = φ₁ m - φ₂ m := rfl
-
-instance (rep₁ rep₂ : WeaklyContinuousRep R G)  : AddHomClass (rep₁ ⟶ rep₂) rep₁ rep₂ :=
-  inferInstanceAs (AddHomClass (rep₁.rep →ᵢ rep₂.rep) rep₁ rep₂)
-
-instance (rep₁ rep₂ : WeaklyContinuousRep R G)  : MulActionHomClass (rep₁ ⟶ rep₂) R rep₁ rep₂ :=
-  inferInstanceAs (MulActionHomClass (rep₁.rep →ᵢ rep₂.rep) R rep₁ rep₂)
-
-instance : ConcreteCategory (WeaklyContinuousRep R G) (fun rep₁ rep₂ ↦ (rep₁.rep →ᵢ rep₂.rep)) where
+instance : ConcreteCategory (WeaklyContinuousRep R G) (fun rep₁ rep₂ ↦ (rep₁.rep →ᵢₜ rep₂.rep)) where
   hom := id
   ofHom := id
+
+omit [TopologicalSpace G] in
+lemma sub_apply (rep₁ rep₂ : WeaklyContinuousRep R G) (φ₁ φ₂ : rep₁ ⟶ rep₂) (m : rep₁) :
+    (ConcreteCategory.hom (φ₁ - φ₂)) m = φ₁ m - φ₂ m := rfl
 
 variable {R G}
 
@@ -327,11 +319,13 @@ def ind₁ : WeaklyContinuousRep R G ⥤ WeaklyContinuousRep R G where
   map_id    := by tauto
   map_comp  := by tauto
 
+instance (rep : WeaklyContinuousRep R G) : FunLike (ind₁.obj rep) G rep := inferInstanceAs (FunLike C(G,rep) G rep)
+
 instance : Functor.Additive (ind₁ (R := R) (G := G)) := ⟨by tauto⟩
 
-instance : Functor.PreservesZeroMorphisms (ind₁ (R := R) (G := G)) := ⟨by tauto⟩
-
 def ind₁.const {rep : WeaklyContinuousRep R G} : rep ⟶ ind₁.obj rep := constᵢ
+
+lemma ind₁.const_apply {rep : WeaklyContinuousRep R G} (m : rep) (x : G) : ind₁.const m x = m := rfl
 
 lemma ind₁.map_comp_const {rep₁ rep₂ : WeaklyContinuousRep R G} (φ : rep₁ ⟶ rep₂) :
   const ≫ ind₁.map φ = φ ≫ const := rfl
@@ -343,8 +337,10 @@ def obj (rep : WeaklyContinuousRep R G) : ℕ → (WeaklyContinuousRep R G)
 | 0     => ind₁.obj rep
 | n + 1 => ind₁.obj (obj rep n)
 
+instance (rep : WeaklyContinuousRep R G) : FunLike (obj rep 0) G rep :=
+  inferInstanceAs (FunLike (ind₁.obj rep) G rep)
 instance (rep : WeaklyContinuousRep R G) (n : ℕ) : FunLike (obj rep (n + 1)) G (obj rep n) :=
-  inferInstanceAs (FunLike C(G,(obj rep n)) G  (obj rep n))
+  inferInstanceAs (FunLike (ind₁.obj (obj rep n)) G (obj rep n))
 
 def d (rep : WeaklyContinuousRep R G) : ∀ n : ℕ, obj rep n ⟶ obj rep (n + 1)
 | 0     => ind₁.const - ind₁.map ind₁.const
@@ -356,6 +352,12 @@ lemma d_succ (rep : WeaklyContinuousRep R G) : d rep (n + 1) = ind₁.const - in
 @[simp] lemma start (rep : WeaklyContinuousRep R G) :
     ind₁.const ≫ d rep 0 = 0 := by
   rw [d_zero, Preadditive.comp_sub, sub_eq_zero, ←ind₁.map_comp_const]
+
+lemma ExactAt_start {rep : WeaklyContinuousRep R G} {f : obj rep 0} (hf : d rep 0 f = 0) (x : G) :
+    f = ind₁.const (f x) := by
+  rw [d_zero, sub_apply, sub_eq_zero] at hf
+  have : ind₁.const f x = ind₁.map ind₁.const f x := by congr 1
+  exact this
 
 @[simp] lemma d_comp_d (rep :  WeaklyContinuousRep R G) (n : ℕ) :
     d rep n ≫ d rep (n + 1) = 0 := by
@@ -369,13 +371,10 @@ lemma d_succ (rep : WeaklyContinuousRep R G) : d rep (n + 1) = ind₁.const - in
     nth_rw 2 [d_succ]
     rw [Preadditive.sub_comp, ind₁.map_comp_const, sub_sub_cancel, ←Functor.map_comp, ih, Functor.map_zero]
 
--- TODO : improve the API to remove the `change` in this proof (see `sub_apply` above).
 lemma ExactAt_aux (rep : WeaklyContinuousRep R G) (n : ℕ) (x : G) (f : obj rep (n + 1)) (hf : d rep (n + 1) f = 0) :
     f = d rep n (f x) := by
-  rw [d_succ] at hf
-  change ind₁.const f - ind₁.map (d rep n) f = 0 at hf
-  rw [sub_eq_zero] at hf
-  have : (ind₁.const f).toFun x = (ind₁.map (d rep n) f).toFun x := by congr
+  rw [d_succ, sub_apply, sub_eq_zero] at hf
+  have : (ind₁.const f) x = (ind₁.map (d rep n) f) x := by congr 1
   exact this
 
 def complex (rep : WeaklyContinuousRep R G) : CochainComplex (WeaklyContinuousRep R G) ℕ where
@@ -415,8 +414,8 @@ def _root_.WeaklyContinuousRep.MultiInd : WeaklyContinuousRep R G ⥤ CochainCom
     | zero => rfl
     | succ _ ih => rw [map, ih]; rfl
 
-noncomputable def HomogeneousCochains : WeaklyContinuousRep R G ⥤ CochainComplex (WeaklyContinuousModuleCat R) ℕ := by
-  exact MultiInd ⋙ invariants (G := G) (R := R).mapHomologicalComplex _
+noncomputable def HomogeneousCochains : WeaklyContinuousRep R G ⥤ CochainComplex (WeaklyContinuousModuleCat R) ℕ :=
+  MultiInd ⋙ invariants (G := G) (R := R).mapHomologicalComplex (ComplexShape.up ℕ)
 
 end MultiInd
 end WeaklyContinuousRep
